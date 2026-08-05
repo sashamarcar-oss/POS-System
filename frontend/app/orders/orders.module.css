@@ -1,0 +1,156 @@
+.shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  padding: 24px 28px 28px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.subtitle {
+  margin: 0 0 6px;
+  color: var(--text-faint);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.errorBanner {
+  margin-bottom: 24px;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.tabBar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.tabButton {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  padding: 10px 15px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.tabButton:hover {
+  border-color: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+.activeTab {
+  background: var(--gradient-primary);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 6px 14px rgba(124, 58, 237, 0.24);
+}
+
+.activeTab:hover {
+  color: #fff;
+}
+
+.orderTableWrap {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.orderTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.orderTable th,
+.orderTable td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.orderTable th {
+  background: var(--bg);
+  color: var(--text-faint);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+}
+
+.orderTable tr:last-child td {
+  border-bottom: none;
+}
+
+.orderTable tbody tr {
+  transition: background 0.12s ease;
+}
+
+.orderTable tbody tr:hover {
+  background: var(--surface-alt);
+}
+
+.smallBtn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 7px 11px;
+  font-size: 12px;
+  margin-right: 6px;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.smallBtn:hover {
+  border-color: var(--primary-light);
+  color: var(--primary-dark);
+  background: var(--primary-soft);
+}
+
+.emptyState {
+  padding: 36px;
+  text-align: center;
+  color: var(--text-faint);
+}
+
+@media (max-width: 980px) {
+  .orderTable th,
+  .orderTable td {
+    padding: 12px 14px;
+  }
+}
+
+@media (max-width: 720px) {
+  .orderTable th,
+  .orderTable td {
+    font-size: 13px;
+  }
+}

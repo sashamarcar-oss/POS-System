@@ -1,0 +1,421 @@
+.shell {
+  display: flex;
+  min-height: 100vh;
+  --dashboard-gap: 20px;
+}
+
+.main {
+  flex: 1;
+  padding: 24px 28px 40px;
+  min-width: 0;
+}
+
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 26px 28px;
+  margin-bottom: 24px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 45%, #7c3aed 100%);
+  box-shadow: 0 14px 30px rgba(109, 40, 217, 0.28);
+  overflow: hidden;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  right: -70px;
+  top: -110px;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.14), transparent 65%);
+  pointer-events: none;
+}
+
+.heroEyebrow {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
+  position: relative;
+  z-index: 1;
+}
+
+.heroSub {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.78);
+  position: relative;
+  z-index: 1;
+}
+
+.heroActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.newSaleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  background: #fff;
+  color: #6d28d9;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.newSaleBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+}
+
+.refreshBtn {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.refreshBtn:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--dashboard-gap);
+  margin-bottom: var(--dashboard-gap);
+}
+
+.metricCard {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-soft);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.metricCard:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-light);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.cardIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: var(--gradient-primary);
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(124, 58, 237, 0.25);
+}
+
+.cardIconWarning {
+  background: linear-gradient(135deg, #fbbf24, #b45309);
+  box-shadow: 0 6px 14px rgba(180, 83, 9, 0.22);
+}
+
+.cardLabel {
+  color: var(--text-faint);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cardValue {
+  font-size: 26px;
+  font-weight: 800;
+  margin-top: 6px;
+  color: var(--text);
+}
+
+.cardSub {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 18px;
+}
+
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.deltaUp {
+  color: #15803d;
+  background: #dcfce7;
+}
+
+.deltaDown {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.deltaNeutral {
+  color: var(--text-muted);
+  background: var(--surface-alt);
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--dashboard-gap);
+}
+
+.trendCard {
+  grid-column: 1 / -1;
+}
+
+.chartCard {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-soft);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+}
+
+.chartHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.chartHeader h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.chartHeader span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-soft);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.barList {
+  display: grid;
+  gap: 13px;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: 60px 1fr 90px;
+  gap: 12px;
+  align-items: center;
+}
+
+.barLabel {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.barTrack {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.barValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+}
+
+.listStack {
+  display: grid;
+  gap: 10px;
+}
+
+.listRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  border: 1px solid var(--border-soft);
+  font-size: 14px;
+}
+
+.listRow strong {
+  color: var(--primary-dark);
+  white-space: nowrap;
+}
+
+.rankBadge {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--primary-dark);
+  background: var(--primary-soft);
+}
+
+.listMain {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.listName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.listWalletIcon {
+  color: var(--primary);
+  flex: none;
+}
+
+.listTrack {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border-soft);
+  overflow: hidden;
+}
+
+.listFill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.paymentFill {
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+}
+
+.emptyState {
+  padding: 24px;
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 14px;
+}
+
+.errorBanner {
+  margin-bottom: 24px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-weight: 500;
+}
+
+@media (max-width: 1100px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+  .trendCard {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .main {
+    padding: 18px 16px 32px;
+  }
+  .hero {
+    padding: 22px 20px;
+  }
+  .heroTitle {
+    font-size: 22px;
+  }
+  .heroActions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+  .barRow {
+    grid-template-columns: 52px 1fr 78px;
+    gap: 8px;
+  }
+}
