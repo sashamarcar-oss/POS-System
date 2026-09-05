@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-hokoumllu)l8$@$48#x#u$eui0*+yy1$21u2z1%g7sfd*_n-2i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'pos-system-83n5.onrender.com',
+]
 
 
 # Application definition
@@ -70,9 +74,13 @@ SIMPLE_JWT = {
 }
 from corsheaders.defaults import default_headers
 
-
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'https://pos-system-e9s4-a1ilsw2pb-caren-m-s-projects.vercel.app',
+]
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+    'https://pos-system-e9s4-a1ilsw2pb-caren-m-s-projects.vercel.app',
 ]
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'x-business-id',
