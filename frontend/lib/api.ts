@@ -3,7 +3,7 @@
 // (see backend TenantScopedViewSet), so the backend enforces tenant isolation
 // server-side no matter what the frontend sends.
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://pos-system-83n5.onrender.com/api";
 
 function getToken() {
   if (typeof window === "undefined") return null;
