@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, AlertCircle, Loader } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
@@ -20,6 +20,14 @@ type PaymentResult = {
 };
 
 export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={null}>
+      <PaymentPageInner />
+    </Suspense>
+  );
+}
+
+function PaymentPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const reference = searchParams.get("reference");

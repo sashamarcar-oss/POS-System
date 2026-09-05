@@ -142,3 +142,15 @@
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
+
+@media (max-width: 640px) {
+  .main {
+    padding: 16px;
+  }
+  .card {
+    padding: 28px 20px;
+  }
+  .title {
+    font-size: 22px;
+  }
+}

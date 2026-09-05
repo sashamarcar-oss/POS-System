@@ -277,3 +277,28 @@
   cursor: not-allowed;
 }
 
+@media (max-width: 640px) {
+  .main {
+    padding: 18px 16px 32px;
+  }
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .title {
+    font-size: 24px;
+  }
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+  .modal {
+    width: 95%;
+  }
+  .modalFooter {
+    flex-direction: column-reverse;
+  }
+  .modalFooter button {
+    width: 100%;
+  }
+}
+

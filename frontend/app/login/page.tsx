@@ -53,7 +53,7 @@ export default function LoginPage() {
       currency: membership.currency,
       defaultTaxRate: membership.default_tax_rate,
     });
-    router.push("/pos");
+    router.push("/dashboard");
   }
 
   return (

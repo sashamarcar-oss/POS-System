@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Box, AlertTriangle, PackageX, Search } from "lucide-react";
+import { Box, AlertTriangle, PackagePlus, PackageX, Search, X } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
-import { api, getActiveBusinessName } from "@/lib/api";
+import { api, getActiveBusinessName, getActiveRole } from "@/lib/api";
 import styles from "./stock.module.css";
 
 type StockItem = {
@@ -36,7 +36,13 @@ export default function StockPage() {
   const [locations, setLocations] = useState<StockLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [restockItem, setRestockItem] = useState<StockItem | null>(null);
+  const [restockQuantity, setRestockQuantity] = useState("");
+  const [restockNote, setRestockNote] = useState("");
+  const [restocking, setRestocking] = useState(false);
   const businessName = getActiveBusinessName();
+  const canManage = ["manager", "owner"].includes(getActiveRole() || "");
 
   useEffect(() => {
     if (typeof window !== "undefined" && !localStorage.getItem("access_token")) {
@@ -62,6 +68,46 @@ export default function StockPage() {
       setError(err.message || "Could not load stock data.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  function openRestock(item: StockItem) {
+    setRestockItem(item);
+    setRestockQuantity("");
+    setRestockNote("");
+    setError("");
+  }
+
+  function closeRestock() {
+    if (!restocking) setRestockItem(null);
+  }
+
+  async function submitRestock(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!restockItem) return;
+    const quantity = Number(restockQuantity);
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      setError("Enter a restock quantity greater than zero.");
+      return;
+    }
+
+    setRestocking(true);
+    setError("");
+    try {
+      await api.createStockMovement({
+        stock_item: restockItem.id,
+        quantity_delta: quantity,
+        reason: "restock",
+        note: restockNote.trim(),
+      });
+      setRestockItem(null);
+      setNotice(`${restockItem.product_name || "Item"} restocked successfully.`);
+      await loadData();
+      window.setTimeout(() => setNotice(""), 3000);
+    } catch (err: any) {
+      setError(err.message || "Could not restock this item.");
+    } finally {
+      setRestocking(false);
     }
   }
 
@@ -108,6 +154,7 @@ export default function StockPage() {
         </div>
 
         {error && <div className={styles.errorBanner}>{error}</div>}
+        {notice && <div className={styles.noticeBanner}>{notice}</div>}
 
         <div className={styles.summaryGrid}>
           <div className={styles.summaryCard}>
@@ -150,13 +197,14 @@ export default function StockPage() {
                   <th>Location</th>
                   <th>On hand</th>
                   <th>Status</th>
+                  {canManage && <th>Action</th>}
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={5} className={styles.emptyState}>Loading stock...</td></tr>
+                  <tr><td colSpan={canManage ? 6 : 5} className={styles.emptyState}>Loading stock...</td></tr>
                 ) : filteredItems.length === 0 ? (
-                  <tr><td colSpan={5} className={styles.emptyState}>No stock items match your search.</td></tr>
+                  <tr><td colSpan={canManage ? 6 : 5} className={styles.emptyState}>No stock items match your search.</td></tr>
                 ) : (
                   filteredItems.map((item) => {
                     const product = productMap.get(item.product);
@@ -175,6 +223,14 @@ export default function StockPage() {
                             {status.label}
                           </span>
                         </td>
+                        {canManage && (
+                          <td>
+                            <button className={styles.restockButton} onClick={() => openRestock(item)} type="button">
+                              <PackagePlus size={15} />
+                              Restock
+                            </button>
+                          </td>
+                        )}
                       </tr>
                     );
                   })
@@ -184,6 +240,36 @@ export default function StockPage() {
           </div>
         </section>
       </main>
+      {restockItem && (
+        <div className={styles.modalOverlay} onMouseDown={closeRestock}>
+          <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="restock-title" onMouseDown={(event) => event.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div>
+                <p className={styles.modalEyebrow}>Inventory update</p>
+                <h2 id="restock-title">Restock item</h2>
+                <p>{restockItem.product_name || "Unknown item"} at {locationMap.get(restockItem.location)?.name || "this location"}</p>
+              </div>
+              <button className={styles.closeButton} type="button" onClick={closeRestock} aria-label="Close restock dialog">
+                <X size={18} />
+              </button>
+            </div>
+            <form onSubmit={submitRestock}>
+              <label className={styles.fieldLabel}>
+                Quantity to add
+                <input autoFocus className={styles.fieldInput} min="0.001" onChange={(event) => setRestockQuantity(event.target.value)} placeholder="e.g. 10" required step="0.001" type="number" value={restockQuantity} />
+              </label>
+              <label className={styles.fieldLabel}>
+                Note <span>(optional)</span>
+                <textarea className={styles.fieldInput} onChange={(event) => setRestockNote(event.target.value)} placeholder="Supplier delivery, purchase order..." rows={3} value={restockNote} />
+              </label>
+              <div className={styles.modalActions}>
+                <button className={styles.cancelButton} type="button" onClick={closeRestock}>Cancel</button>
+                <button className={styles.confirmButton} disabled={restocking} type="submit">{restocking ? "Restocking..." : "Confirm restock"}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -757,7 +757,7 @@ export default function POSPage() {
               </div>
               <div className={`${styles.summaryRow} ${styles.total}`}><span>Total</span><span>{formatMoney(cartTotal, currency)}</span></div>
 
-              <button className={styles.checkoutButton} disabled={checkingOut || cart.length === 0} onClick={() => setShowPaymentMethodSelector(true)}>
+              <button className={styles.checkoutButton} disabled={checkingOut || cart.length === 0} onClick={() => handleCheckout("card")}>
                 <Wallet size={17} /> {checkingOut ? "Processing..." : `Checkout ${formatMoney(cartTotal, currency)}`}
               </button>
 

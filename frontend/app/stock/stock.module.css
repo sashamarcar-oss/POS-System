@@ -72,6 +72,15 @@
   font-weight: 500;
 }
 
+.noticeBanner {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--success-soft);
+  color: var(--success);
+  font-weight: 500;
+}
+
 .summaryGrid {
   display: grid;
   gap: 16px;
@@ -246,10 +255,149 @@
   background: #fee2e2;
 }
 
+.restockButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  background: var(--surface);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.restockButton:hover {
+  border-color: var(--primary-light);
+  background: var(--primary-soft);
+}
+
 .emptyState {
   padding: 28px 0;
   text-align: center;
   color: var(--text-faint);
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(34, 28, 53, 0.36);
+}
+
+.modal {
+  width: min(100%, 440px);
+  padding: 24px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.modalHeader h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.modalHeader p:last-child {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 13px;
+}
+
+.modalEyebrow {
+  margin: 0 0 6px;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.closeButton {
+  align-self: flex-start;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.fieldLabel {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.fieldLabel span {
+  color: var(--text-faint);
+  font-weight: 400;
+}
+
+.fieldInput {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  color: var(--text);
+  font-size: 14px;
+  resize: vertical;
+}
+
+.fieldInput:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.cancelButton,
+.confirmButton {
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.cancelButton {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+}
+
+.confirmButton {
+  border: 0;
+  background: var(--gradient-primary);
+  color: #fff;
+}
+
+.confirmButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 
 @media (max-width: 640px) {

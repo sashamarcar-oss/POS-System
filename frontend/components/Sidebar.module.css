@@ -159,3 +159,40 @@
 .logout {
   margin-top: 8px;
 }
+
+/* Responsive: collapse to icon-only rails on smaller screens. The page
+   components still render the text spans, so hide them via CSS here and
+   match the icon-rail dimensions of the `collapsed` variant. */
+@media (max-width: 1100px) {
+  .sidebar {
+    width: 76px;
+  }
+  .brand span,
+  .navItem span,
+  .branchCard > div,
+  .logout span {
+    display: none;
+  }
+  .brand {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .branchCard {
+    justify-content: center;
+  }
+  .navItem {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .sidebar {
+    padding: 14px 10px;
+  }
+  .brand {
+    padding-bottom: 14px;
+  }
+}

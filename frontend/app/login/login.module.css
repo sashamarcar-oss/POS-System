@@ -262,6 +262,18 @@
   color: var(--text-faint);
 }
 
+@media (max-width: 480px) {
+  .formSide {
+    padding: 24px 16px;
+  }
+  .formCard {
+    padding: 28px 22px;
+  }
+  .heading {
+    font-size: 22px;
+  }
+}
+
 @media (min-width: 900px) {
   .panel {
     display: flex;
