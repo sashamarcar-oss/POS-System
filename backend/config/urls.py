@@ -8,7 +8,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from apps.catalog.views import ProductTypeViewSet, CategoryViewSet, ProductViewSet, ProductVariantViewSet
 from apps.inventory.views import StockLocationViewSet, StockItemViewSet, StockMovementViewSet
-from apps.sales.views import CustomerViewSet, ExpenseViewSet, OrderViewSet, verify_payment, paystack_webhook
+from apps.sales.views import CustomerViewSet, ExpenseViewSet, OrderViewSet
 from apps.tenants.views import MyBusinessesView, TeamMemberViewSet, BusinessSettingsView
 from apps.users.views import ChangePasswordView
 
@@ -33,8 +33,6 @@ urlpatterns = [
     path("api/auth/change-password/", ChangePasswordView.as_view(), name="change_password"),
     path("api/auth/me/businesses/", MyBusinessesView.as_view(), name="my_businesses"),
     path("api/settings/", BusinessSettingsView.as_view(), name="business_settings"),
-    path("api/payments/verify/<str:reference>/", verify_payment, name="verify_payment"),
-    path("api/payments/webhook/", paystack_webhook, name="paystack_webhook"),
     path("api/", include(router.urls)),
 ]
 

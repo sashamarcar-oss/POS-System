@@ -186,14 +186,10 @@ class OrderItem(BusinessScopedModel):
 
 class Payment(BusinessScopedModel):
     METHOD_CASH = "cash"
-    METHOD_CARD = "card"
     METHOD_MOBILE = "mobile_money"
-    METHOD_OTHER = "other"
     METHOD_CHOICES = [
         (METHOD_CASH, "Cash"),
-        (METHOD_CARD, "Card"),
-        (METHOD_MOBILE, "Mobile Money"),
-        (METHOD_OTHER, "Other"),
+        (METHOD_MOBILE, "M-Pesa"),
     ]
 
     STATUS_PENDING = "pending"
@@ -206,10 +202,8 @@ class Payment(BusinessScopedModel):
     ]
 
     PROVIDER_MANUAL = "manual"
-    PROVIDER_PAYSTACK = "paystack"
     PROVIDER_CHOICES = [
         (PROVIDER_MANUAL, "Manual"),
-        (PROVIDER_PAYSTACK, "Paystack"),
     ]
 
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="payments")

@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Menu, Search, Barcode, PauseCircle, ParkingSquare, Trash2, ChevronDown,
-  Star, Plus, Minus, X, Banknote, CreditCard, Smartphone, MoreHorizontal,
+  Star, Plus, Minus, X, Banknote, Smartphone,
   Save, CheckCircle2, Wallet,
 } from "lucide-react";
-import { api, clearSession, getActiveRole, getActiveUsername, getActiveBusinessName, getActiveCurrency, getActiveDefaultTaxRate, getActivePaymentMethods } from "@/lib/api";
+import { api, clearSession, getActiveRole, getActiveUsername, getActiveBusinessName, getActiveCurrency, getActiveDefaultTaxRate } from "@/lib/api";
 import { formatMoney, tileStyleFor, initialsFor } from "@/lib/format";
 import { getFavoriteIds, toggleFavorite } from "@/lib/favorites";
 import Sidebar from "@/components/Sidebar";
@@ -42,18 +42,10 @@ type CartLine = {
 
 const PAYMENT_METHODS: { key: string; label: string; icon: React.ReactNode }[] = [
   { key: "cash", label: "Cash", icon: <Banknote size={15} /> },
-  { key: "card", label: "Card", icon: <CreditCard size={15} /> },
-  { key: "mobile_money", label: "Mobile Money", icon: <Smartphone size={15} /> },
-  { key: "other", label: "Other", icon: <MoreHorizontal size={15} /> },
+  { key: "mobile_money", label: "M-Pesa", icon: <Smartphone size={15} /> },
 ];
 
-// Only offer payment methods the owner has enabled in Settings. Falls back
-// to the full list when nothing has been configured yet.
-const configuredMethods = getActivePaymentMethods();
-const VISIBLE_PAYMENT_METHODS =
-  configuredMethods.length > 0
-    ? PAYMENT_METHODS.filter((m) => configuredMethods.includes(m.key))
-    : PAYMENT_METHODS;
+const VISIBLE_PAYMENT_METHODS = PAYMENT_METHODS;
 
 const VISIBLE_CATEGORY_COUNT = 4;
 
@@ -85,22 +77,12 @@ export default function POSPage() {
   const [receipt, setReceipt] = useState<OrderRes | null>(null);
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [showPaymentMethodSelector, setShowPaymentMethodSelector] = useState(false);
-  const [showPaystackModal, setShowPaystackModal] = useState(false);
-  const [showMobileMoneyModal, setShowMobileMoneyModal] = useState(false);
-  const [pendingOrder, setPendingOrder] = useState<OrderRes | null>(null);
-  const [customerEmail, setCustomerEmail] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [mobileMoneyProvider, setMobileMoneyProvider] = useState("mpesa");
-  const [paystackProcessing, setPaystackProcessing] = useState(false);
-  const [mobileMoneyProcessing, setMobileMoneyProcessing] = useState(false);
 
   const role = getActiveRole() || "cashier";
   const username = getActiveUsername() || "User";
   const businessName = getActiveBusinessName();
   const currency = getActiveCurrency();
   const defaultTaxRate = getActiveDefaultTaxRate();
-  const paystackPublicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "pk_test_4b24f68b6e0fdf05fc7036b60dd1e19c6f81c2b4";
-
   useEffect(() => {
     if (typeof window !== "undefined" && !localStorage.getItem("access_token")) {
       router.replace("/login");
@@ -108,18 +90,6 @@ export default function POSPage() {
     }
     setFavoriteIds(getFavoriteIds());
     loadData();
-    
-    // Load Paystack script
-    const script = document.createElement("script");
-    script.src = "https://js.paystack.co/v1/inline.js";
-    script.async = true;
-    document.body.appendChild(script);
-    
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
   }, []);
 
   async function loadData() {
@@ -307,164 +277,17 @@ export default function POSPage() {
       const order = await persistCartAsOrder();
       if (!order) return;
 
-      // Handle Paystack card payments
-      if (method === "card") {
-        setPendingOrder(order);
-        setShowPaystackModal(true);
-        setCheckingOut(false);
-        return;
-      } else if (method === "mobile_money") {
-        // Show mobile money modal
-        setPendingOrder(order);
-        setShowMobileMoneyModal(true);
-        setCheckingOut(false);
-        return;
-      } else {
-        // Handle cash and other payment methods
-        const finalOrder = await api.checkout(order.id, [
-          { method, amount: (Math.round(cartTotal * 100) / 100).toFixed(2) },
-        ]);
-        setReceiptCart(cart);
-        setReceipt(finalOrder);
-        setCart([]);
-        loadData();
-      }
+      const finalOrder = await api.checkout(order.id, [
+        { method, amount: (Math.round(cartTotal * 100) / 100).toFixed(2) },
+      ]);
+      setReceiptCart(cart);
+      setReceipt(finalOrder);
+      setCart([]);
+      loadData();
     } catch (err: any) {
       setError(err.message);
     } finally {
       setCheckingOut(false);
-    }
-  }
-
-  async function handlePaystackPayment() {
-    if (!customerEmail.trim()) {
-      setError("Please enter customer email");
-      return;
-    }
-    if (!pendingOrder) {
-      setError("No order selected");
-      return;
-    }
-
-    setPaystackProcessing(true);
-    setError("");
-    
-    try {
-      const paystackResult = await api.initializePaystackPayment(
-        pendingOrder.id,
-        customerEmail.trim()
-      );
-
-      // Use Paystack inline payment
-      const handler = (window as any).PaystackPop.setup({
-        key: paystackPublicKey,
-        email: customerEmail.trim(),
-        amount: Math.round(parseFloat(pendingOrder.total) * 100),
-        currency: "KES",
-        ref: paystackResult.reference,
-        onClose: () => {
-          setPaystackProcessing(false);
-          setError("Payment window closed.");
-        },
-        onSuccess: async (response: any) => {
-          try {
-            // Verify payment with backend
-            const verifyResult = await api.verifyPayment(paystackResult.reference);
-            setReceiptCart(cart);
-            setReceipt(verifyResult.order);
-            setCart([]);
-            setShowPaystackModal(false);
-            setPendingOrder(null);
-            setCustomerEmail("");
-            setPaystackProcessing(false);
-            loadData();
-          } catch (err: any) {
-            setError(`Payment verified but failed to update order: ${err.message}`);
-            setPaystackProcessing(false);
-          }
-        },
-      });
-      handler.openIframe();
-    } catch (err: any) {
-      setError(`Payment initialization failed: ${err.message}`);
-      setPaystackProcessing(false);
-    }
-  }
-
-  async function handleMobileMoneyPayment() {
-    if (!customerEmail.trim()) {
-      setError("Please enter customer email");
-      return;
-    }
-    if (!customerPhone.trim()) {
-      setError("Please enter customer phone number");
-      return;
-    }
-    if (!pendingOrder) {
-      setError("No order selected");
-      return;
-    }
-
-    setMobileMoneyProcessing(true);
-    setError("");
-
-    try {
-      const paystackResult = await api.initializePaystackPayment(
-        pendingOrder.id,
-        customerEmail.trim()
-      );
-
-      const handler = (window as any).PaystackPop.setup({
-        key: paystackPublicKey,
-        email: customerEmail.trim(),
-        amount: Math.round(parseFloat(pendingOrder.total) * 100),
-        currency,
-        channels: ["mobile_money"],
-        ref: paystackResult.reference,
-        mobile_money: {
-          phone: customerPhone.trim(),
-          provider: mobileMoneyProvider,
-        },
-        metadata: {
-          custom_fields: [
-            {
-              display_name: "Customer Phone",
-              variable_name: "customer_phone",
-              value: customerPhone.trim(),
-            },
-            {
-              display_name: "Provider",
-              variable_name: "mobile_money_provider",
-              value: mobileMoneyProvider,
-            },
-          ],
-        },
-        onClose: () => {
-          setMobileMoneyProcessing(false);
-          setError("Payment window closed.");
-        },
-        onSuccess: async (response: any) => {
-          try {
-            const verifyResult = await api.verifyPayment(paystackResult.reference);
-            setReceiptCart(cart);
-            setReceipt(verifyResult.order);
-            setCart([]);
-            setShowMobileMoneyModal(false);
-            setPendingOrder(null);
-            setCustomerEmail("");
-            setCustomerPhone("");
-            setMobileMoneyProcessing(false);
-            loadData();
-          } catch (err: any) {
-            setError(`Payment verified but failed to update order: ${err.message}`);
-            setMobileMoneyProcessing(false);
-          }
-        },
-      });
-      handler.openIframe();
-    } catch (err: any) {
-      setError(`Payment initialization failed: ${err.message}`);
-      setMobileMoneyProcessing(false);
     }
   }
 
@@ -757,7 +580,7 @@ export default function POSPage() {
               </div>
               <div className={`${styles.summaryRow} ${styles.total}`}><span>Total</span><span>{formatMoney(cartTotal, currency)}</span></div>
 
-              <button className={styles.checkoutButton} disabled={checkingOut || cart.length === 0} onClick={() => handleCheckout("card")}>
+              <button className={styles.checkoutButton} disabled={checkingOut || cart.length === 0} onClick={() => setShowPaymentMethodSelector(true)}>
                 <Wallet size={17} /> {checkingOut ? "Processing..." : `Checkout ${formatMoney(cartTotal, currency)}`}
               </button>
 
@@ -775,19 +598,19 @@ export default function POSPage() {
 
       {/* Payment Method Selection Modal */}
       {showPaymentMethodSelector && (
-        <div className={styles.paystackOverlay} onClick={() => setShowPaymentMethodSelector(false)}>
-          <div className={styles.paystackModal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.paystackHeader}>
+        <div className={styles.paymentOverlay} onClick={() => setShowPaymentMethodSelector(false)}>
+          <div className={styles.paymentModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.paymentHeader}>
               <h2>Select Payment Method</h2>
               <button 
-                className={styles.paystackClose} 
+                className={styles.paymentClose}
                 onClick={() => setShowPaymentMethodSelector(false)}
               >
                 <X size={20} />
               </button>
             </div>
 
-            <div className={styles.paystackContent}>
+            <div className={styles.paymentContent}>
               <div className={styles.paymentMethodList}>
                 {VISIBLE_PAYMENT_METHODS.map((m) => (
                   <button
@@ -808,168 +631,6 @@ export default function POSPage() {
         </div>
       )}
 
-      {/* Paystack Payment Modal */}
-      {showPaystackModal && (
-        <div className={styles.paystackOverlay} onClick={() => !paystackProcessing && setShowPaystackModal(false)}>
-          <div className={styles.paystackModal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.paystackHeader}>
-              <h2>Card Payment</h2>
-              <button 
-                className={styles.paystackClose} 
-                onClick={() => !paystackProcessing && setShowPaystackModal(false)}
-                disabled={paystackProcessing}
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {error && (
-              <div className={styles.paystackError}>
-                {error}
-              </div>
-            )}
-
-            <div className={styles.paystackContent}>
-              <div className={styles.orderSummary}>
-                <div className={styles.summaryItem}>
-                  <span>Amount</span>
-                  <strong>{formatMoney(parseFloat(pendingOrder?.total || "0"), currency)}</strong>
-                </div>
-                <div className={styles.summaryItem}>
-                  <span>Items</span>
-                  <strong>{cart.length}</strong>
-                </div>
-              </div>
-
-              <div className={styles.emailField}>
-                <label>Customer Email *</label>
-                <input
-                  type="email"
-                  placeholder="customer@example.com"
-                  value={customerEmail}
-                  onChange={(e) => setCustomerEmail(e.target.value)}
-                  disabled={paystackProcessing}
-                  autoFocus
-                />
-              </div>
-
-              <p className={styles.paystackInfo}>
-                You will be redirected to enter your card details securely
-              </p>
-            </div>
-
-            <div className={styles.paystackFooter}>
-              <button 
-                className="btn-secondary" 
-                onClick={() => setShowPaystackModal(false)}
-                disabled={paystackProcessing}
-              >
-                Cancel
-              </button>
-              <button 
-                className="btn-primary" 
-                onClick={handlePaystackPayment}
-                disabled={paystackProcessing || !customerEmail.trim()}
-              >
-                {paystackProcessing ? "Processing..." : "Pay with Card"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showMobileMoneyModal && (
-        <div className={styles.paystackOverlay} onClick={() => !mobileMoneyProcessing && setShowMobileMoneyModal(false)}>
-          <div className={styles.paystackModal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.paystackHeader}>
-              <h2>Mobile Money Payment</h2>
-              <button 
-                className={styles.paystackClose} 
-                onClick={() => !mobileMoneyProcessing && setShowMobileMoneyModal(false)}
-                disabled={mobileMoneyProcessing}
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {error && (
-              <div className={styles.paystackError}>
-                {error}
-              </div>
-            )}
-
-            <div className={styles.paystackContent}>
-              <div className={styles.orderSummary}>
-                <div className={styles.summaryItem}>
-                  <span>Amount</span>
-                  <strong>{formatMoney(parseFloat(pendingOrder?.total || "0"), currency)}</strong>
-                </div>
-                <div className={styles.summaryItem}>
-                  <span>Items</span>
-                  <strong>{cart.length}</strong>
-                </div>
-              </div>
-
-              <div className={styles.emailField}>
-                <label>Customer Email *</label>
-                <input
-                  type="email"
-                  placeholder="customer@example.com"
-                  value={customerEmail}
-                  onChange={(e) => setCustomerEmail(e.target.value)}
-                  disabled={mobileMoneyProcessing}
-                />
-              </div>
-
-              <div className={styles.emailField}>
-                <label>Customer Phone *</label>
-                <input
-                  type="tel"
-                  placeholder="254712345678"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                  disabled={mobileMoneyProcessing}
-                />
-              </div>
-
-              <div className={styles.emailField}>
-                <label>Mobile Money Provider</label>
-                <select
-                  value={mobileMoneyProvider}
-                  onChange={(e) => setMobileMoneyProvider(e.target.value)}
-                  disabled={mobileMoneyProcessing}
-                >
-                  <option value="mpesa">M-Pesa</option>
-                  <option value="airtel_money">Airtel Money</option>
-                  <option value="tigo_pesa">Tigo Pesa</option>
-                  <option value="vodafone_cash">Vodafone Cash</option>
-                </select>
-              </div>
-
-              <p className={styles.paystackInfo}>
-                You will be redirected to complete your mobile money payment securely.
-              </p>
-            </div>
-
-            <div className={styles.paystackFooter}>
-              <button 
-                className="btn-secondary" 
-                onClick={() => setShowMobileMoneyModal(false)}
-                disabled={mobileMoneyProcessing}
-              >
-                Cancel
-              </button>
-              <button 
-                className="btn-primary" 
-                onClick={handleMobileMoneyPayment}
-                disabled={mobileMoneyProcessing || !customerEmail.trim() || !customerPhone.trim()}
-              >
-                {mobileMoneyProcessing ? "Processing..." : "Pay with Mobile Money"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -219,15 +219,6 @@ export const api = {
 
   voidOrder: (orderId: string) => request(`/orders/${orderId}/void/`, { method: "POST" }),
 
-  initializePaystackPayment: (orderId: string, email: string, customerName?: string) =>
-    request(`/orders/${orderId}/pay-with-paystack/`, {
-      method: "POST",
-      body: JSON.stringify({ email, customer_name: customerName }),
-    }),
-
-  verifyPayment: (reference: string) =>
-    request(`/payments/verify/${reference}/`, { method: "GET" }),
-
   listTeam: () => request("/team/"),
 
   getSettings: () => request("/settings/"),

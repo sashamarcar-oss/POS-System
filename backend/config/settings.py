@@ -170,7 +170,3 @@ STATIC_URL = 'static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Paystack Configuration
-import os
-PAYSTACK_PUBLIC_KEY = os.getenv('PAYSTACK_PUBLIC_KEY', 'pk_test_4b24f68b6e0fdf05fc7036b60dd1e19c6f81c2b4')
-PAYSTACK_SECRET_KEY = os.getenv('PAYSTACK_SECRET_KEY', 'sk_test_1dfbbb6b76bd0ae0d050f01cdcfcb3d924f2c612')

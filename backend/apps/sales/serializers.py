@@ -54,3 +54,10 @@ class CheckoutSerializer(serializers.Serializer):
         child=serializers.DictField(), allow_empty=False,
         help_text='[{"method": "cash", "amount": "12.50"}]',
     )
+
+    def validate_payments(self, payments):
+        allowed_methods = {Payment.METHOD_CASH, Payment.METHOD_MOBILE}
+        for payment in payments:
+            if payment.get("method") not in allowed_methods:
+                raise serializers.ValidationError("Payment method must be cash or mpesa.")
+        return payments

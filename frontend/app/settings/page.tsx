@@ -42,9 +42,7 @@ type SettingsData = {
 
 const ALL_PAYMENT_METHODS: { key: string; label: string; hint: string }[] = [
   { key: "cash", label: "Cash", hint: "Physical banknotes and coins tendered at the register." },
-  { key: "card", label: "Card", hint: "Visa / Mastercard collected through the Paystack checkout." },
-  { key: "mobile_money", label: "Mobile Money", hint: "M-Pesa, Airtel Money and other mobile wallets." },
-  { key: "other", label: "Other", hint: "Bank transfer, cheque, store credit and anything else." },
+  { key: "mobile_money", label: "M-Pesa", hint: "Manual M-Pesa payments recorded at the register." },
 ];
 
 const CURRENCIES = ["USD", "KES", "NGN", "GHS", "ZAR", "UGX", "TZS", "RWF", "ETB", "EGP", "MAD", "GBP", "EUR", "CAD", "AUD", "INR", "PKR", "BDT", "AED", "SGD"];

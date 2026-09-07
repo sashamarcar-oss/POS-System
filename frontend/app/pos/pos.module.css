@@ -668,8 +668,8 @@
   padding-top: 10px;
 }
 
-/* Paystack Modal */
-.paystackOverlay {
+/* Payment method modal */
+.paymentOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -682,7 +682,7 @@
   z-index: 1000;
 }
 
-.paystackModal {
+.paymentModal {
   background: #fff;
   border-radius: 14px;
   width: 92%;
@@ -694,7 +694,7 @@
   max-height: 90vh;
 }
 
-.paystackHeader {
+.paymentHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -702,13 +702,13 @@
   border-bottom: 1px solid var(--border-soft);
 }
 
-.paystackHeader h2 {
+.paymentHeader h2 {
   margin: 0;
   font-size: 20px;
   font-weight: 700;
 }
 
-.paystackClose {
+.paymentClose {
   background: none;
   border: none;
   cursor: pointer;
@@ -720,16 +720,16 @@
   transition: color 0.2s;
 }
 
-.paystackClose:hover:not(:disabled) {
+.paymentClose:hover:not(:disabled) {
   color: var(--text-primary);
 }
 
-.paystackClose:disabled {
+.paymentClose:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
 
-.paystackError {
+.paymentError {
   background: #fee2e2;
   color: #991b1b;
   padding: 12px 16px;
@@ -737,7 +737,7 @@
   border-bottom: 1px solid #fecaca;
 }
 
-.paystackContent {
+.paymentContent {
   padding: 24px;
   flex: 1;
   overflow-y: auto;
@@ -801,7 +801,7 @@
   opacity: 0.6;
 }
 
-.paystackInfo {
+.paymentInfo {
   font-size: 12px;
   color: var(--text-faint);
   margin: 12px 0 0;
@@ -811,7 +811,7 @@
   line-height: 1.5;
 }
 
-.paystackFooter {
+.paymentFooter {
   display: flex;
   gap: 12px;
   padding: 16px 24px;
@@ -819,7 +819,7 @@
   background: var(--bg);
 }
 
-.paystackFooter button {
+.paymentFooter button {
   flex: 1;
   padding: 12px 16px;
   border-radius: 8px;
@@ -830,7 +830,7 @@
   transition: all 0.2s;
 }
 
-.paystackFooter button:disabled {
+.paymentFooter button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
