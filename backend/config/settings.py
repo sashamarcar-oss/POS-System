@@ -76,11 +76,13 @@ from corsheaders.defaults import default_headers
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
-    'https://pos-system-e9s4-a1ilsw2pb-caren-m-s-projects.vercel.app',
+]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r'^https://pos-system-e9s4-.*-caren-m-s-projects\.vercel\.app$',
 ]
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
-    'https://pos-system-e9s4-a1ilsw2pb-caren-m-s-projects.vercel.app',
+    'https://*.vercel.app',
 ]
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'x-business-id',
