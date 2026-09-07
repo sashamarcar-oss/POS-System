@@ -78,7 +78,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
 ]
 CORS_ALLOWED_ORIGIN_REGEXES = [
-    r'^https://pos-system-e9s4-.*-caren-m-s-projects\.vercel\.app$',
+    r'^https://pos-system(-[a-z0-9]+)*-caren-m-s-projects\.vercel\.app$',
 ]
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
