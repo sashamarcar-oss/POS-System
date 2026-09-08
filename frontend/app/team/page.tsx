@@ -39,7 +39,7 @@ export default function TeamPage() {
   async function load() {
     try {
       const data = await api.listTeam();
-      setMembers(data.results || data);
+      setMembers(data);
     } catch (err: any) {
       setError(err.message);
     }
