@@ -5,8 +5,9 @@
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://pos-system-83n5.onrender.com/api";
 
-export function getMediaUrl(value: string | null | undefined) {
-  if (!value || value.startsWith("data:") || value.startsWith("http://") || value.startsWith("https://")) return value;
+export function getMediaUrl(value: string | null | undefined): string | undefined {
+  if (!value) return undefined;
+  if (value.startsWith("data:") || value.startsWith("http://") || value.startsWith("https://")) return value;
   return new URL(value, `${API_BASE.replace(/\/api\/?$/, "")}/`).toString();
 }
 
