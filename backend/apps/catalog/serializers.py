@@ -49,3 +49,9 @@ class ProductSerializer(serializers.ModelSerializer):
             "base_price", "tax_rate", "is_active", "attributes", "variants", "image",
         ]
         read_only_fields = ["id"]
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if representation.get("image") and self.context.get("request"):
+            representation["image"] = self.context["request"].build_absolute_uri(representation["image"])
+        return representation

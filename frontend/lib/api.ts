@@ -5,6 +5,11 @@
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://pos-system-83n5.onrender.com/api";
 
+export function getMediaUrl(value: string | null | undefined) {
+  if (!value || value.startsWith("data:") || value.startsWith("http://") || value.startsWith("https://")) return value;
+  return new URL(value, `${API_BASE.replace(/\/api\/?$/, "")}/`).toString();
+}
+
 function getToken() {
   if (typeof window === "undefined") return null;
   return localStorage.getItem("access_token");
@@ -219,7 +224,7 @@ export const api = {
 
   voidOrder: (orderId: string) => request(`/orders/${orderId}/void/`, { method: "POST" }),
 
-  listTeam: () => request("/team/"),
+  listTeam: () => listAll("/team/"),
 
   getSettings: () => request("/settings/"),
 

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Menu, Search, Plus, Pencil, Trash2, X, Camera, Upload, ImageOff } from "lucide-react";
-import { api, getActiveRole, getActiveBusinessName, getActiveCurrency } from "@/lib/api";
+import { api, getActiveRole, getActiveBusinessName, getActiveCurrency, getMediaUrl } from "@/lib/api";
 import { formatMoney, tileStyleFor, initialsFor } from "@/lib/format";
 import Sidebar from "@/components/Sidebar";
 import styles from "./products.module.css";
@@ -114,6 +114,8 @@ export default function ProductsPage() {
   const [newStockLocationName, setNewStockLocationName] = useState("");
 
   const [confirmDelete, setConfirmDelete] = useState<Product | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [updatingPrices, setUpdatingPrices] = useState(false);
 
   const role = getActiveRole() || "cashier";
   const canManage = role === "manager" || role === "owner";
@@ -197,6 +199,101 @@ export default function ProductsPage() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  }
+
+  function parseCSV(text: string) {
+    const rows: string[][] = [];
+    let row: string[] = [];
+    let value = "";
+    let quoted = false;
+    for (const character of text) {
+      if (character === '"') quoted = !quoted;
+      else if (character === "," && !quoted) {
+        row.push(value.trim());
+        value = "";
+      } else if ((character === "\n" || character === "\r") && !quoted) {
+        if (character === "\n" && (value || row.length)) {
+          row.push(value.trim());
+          rows.push(row);
+          row = [];
+          value = "";
+        }
+      } else value += character;
+    }
+    if (value || row.length) {
+      row.push(value.trim());
+      rows.push(row);
+    }
+    return rows;
+  }
+
+  async function handleImportCSV(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!canManage) {
+      setError("Manager role required to import products.");
+      return;
+    }
+    setImporting(true);
+    setError("");
+    try {
+      const rows = parseCSV(await file.text());
+      if (rows.length < 2) throw new Error("The CSV must contain a header row and at least one product.");
+      const headers = rows[0].map((header) => header.toLowerCase());
+      const index = (name: string) => headers.indexOf(name);
+      const nameIndex = index("name");
+      const priceIndex = index("price");
+      if (nameIndex < 0 || priceIndex < 0) throw new Error("CSV must include Name and Price columns.");
+      const defaultType = productTypes[0];
+      if (!defaultType) throw new Error("Create a product type before importing products.");
+      let imported = 0;
+      for (const row of rows.slice(1)) {
+        const name = row[nameIndex]?.trim();
+        const price = row[priceIndex]?.trim();
+        if (!name || !price) continue;
+        const categoryName = index("category") >= 0 ? row[index("category")]?.trim().toLowerCase() : "";
+        const category = categories.find((item) => item.name.toLowerCase() === categoryName);
+        await api.createProduct({
+          name,
+          sku: index("sku") >= 0 ? row[index("sku")]?.trim() || "" : "",
+          base_price: price,
+          tax_rate: index("tax") >= 0 && row[index("tax")]?.trim() ? row[index("tax")].trim() : null,
+          category: category?.id || null,
+          product_type: defaultType.id,
+          is_active: index("status") < 0 || row[index("status")]?.trim().toLowerCase() !== "inactive",
+        });
+        imported += 1;
+      }
+      flashNotice(`${imported} product${imported === 1 ? "" : "s"} imported.`);
+      await loadAll();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  async function handleBulkPriceUpdate() {
+    if (!canManage || selectedProducts.size === 0) return;
+    const price = window.prompt("Enter the new price for the selected products:");
+    if (price === null) return;
+    if (!price.trim() || Number.isNaN(Number(price)) || Number(price) < 0) {
+      setError("Enter a valid non-negative price.");
+      return;
+    }
+    setUpdatingPrices(true);
+    setError("");
+    try {
+      await Promise.all([...selectedProducts].map((id) => api.updateProduct(id, { base_price: price.trim() })));
+      setSelectedProducts(new Set());
+      flashNotice("Selected product prices updated.");
+      await loadAll();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setUpdatingPrices(false);
+    }
   }
 
   async function deleteSelected() {
@@ -482,10 +579,13 @@ export default function ProductsPage() {
         {notice && <div className={styles.noticeBanner}>{notice}</div>}
 
         <div className={styles.actionBar}>
-          <button className="btn-secondary" onClick={() => flashNotice("Import CSV is not available yet.")}>Import CSV</button>
+          <label className="btn-secondary" style={{ cursor: importing || !canManage ? "not-allowed" : "pointer", opacity: !canManage ? 0.55 : 1 }}>
+            {importing ? "Importing..." : "Import CSV"}
+            <input type="file" accept=".csv,text/csv" onChange={handleImportCSV} disabled={importing || !canManage} style={{ display: "none" }} />
+          </label>
           <button className="btn-secondary" onClick={exportCSV}>Export CSV</button>
-          <button className="btn-secondary" disabled={selectedProducts.size === 0} onClick={deleteSelected}>Bulk Delete</button>
-          <button className="btn-secondary" onClick={() => flashNotice("Bulk price update is not available yet.")}>Bulk Price Update</button>
+          <button className="btn-secondary" disabled={!canManage || selectedProducts.size === 0 || loading} onClick={deleteSelected}>Bulk Delete</button>
+          <button className="btn-secondary" disabled={!canManage || selectedProducts.size === 0 || updatingPrices} onClick={handleBulkPriceUpdate}>{updatingPrices ? "Updating..." : "Bulk Price Update"}</button>
           <div style={{ marginLeft: "auto", color: "var(--text-muted)" }}>
             {selectedProducts.size > 0 ? `${selectedProducts.size} selected` : "Select to bulk edit"}
           </div>
@@ -555,7 +655,7 @@ export default function ProductsPage() {
                         <td>
                           <div className={styles.productCell}>
                             {p.image ? (
-                              <img src={p.image} alt={p.name} className={styles.productThumb} />
+                              <img src={getMediaUrl(p.image)} alt={p.name} className={styles.productThumb} />
                             ) : (
                               <div className={styles.tile} style={{ background: tile.bg, color: tile.fg }}>
                                 {initialsFor(p.name)}
@@ -619,7 +719,7 @@ export default function ProductsPage() {
                   <div className={styles.imageUploadRow}>
                     {form.image ? (
                       <div className={styles.imagePreviewWrap}>
-                        <img src={form.image} alt="Product preview" className={styles.imagePreview} />
+                        <img src={getMediaUrl(form.image)} alt="Product preview" className={styles.imagePreview} />
                         <button
                           type="button"
                           className={styles.removeImageBtn}
